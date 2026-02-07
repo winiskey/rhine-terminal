@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>莱茵生命 // 个人终端</title>
+    <style>
+        :root {
+            --primary: #FFD60A;       /* 系统黄 */
+            --primary-dim: #D1AF00;   /* 深黄 */
+            --bg-color: #000000;      /* 纯黑 */
+            --card-bg: #1C1C1E;       /* 卡片灰 */
+            --text-main: #F2F2F7;     /* 主文本 */
+            --text-sub: #98989D;      /* 副文本 */
+            --border: #38383A;        /* 分割线 */
+            --radius: 16px;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            --danger: #FF453A;        /* 系统红 */
+
+            --font-std: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+            --font-num: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: var(--font-std);
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            padding-bottom: 140px;
+            background-image: linear-gradient(#1A1A1A 1px, transparent 1px), linear-gradient(90deg, #1A1A1A 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        /* 顶部用户信息栏 */
+        .header-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow);
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 20px;
+            align-items: start;
+            margin-bottom: 24px;
+            border-left: 6px solid var(--primary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-card::after {
+            content: '04';
+            position: absolute;
+            right: -10px;
+            bottom: -30px;
+            font-family: var(--font-num);
+            font-size: 100px;
+            color: rgba(255, 214, 10, 0.03);
+            pointer-events: none;
+            font-weight: 800;
+            font-style: italic;
+            z-index: 0;
+        }
+
+        .header-left {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 1;
+        }
+
+        .header-title {
+            font-size: 13px;
+            color: var(--text-sub);
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title b { color: var(--primary); font-size: 16px; }
+
+        .header-inputs {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .input-group { flex: 1; min-width: 120px; }
+
+        /* 头像上传区域 */
+        .avatar-container {
+            width: 100px;
+            height: 100px;
+            border-radius: 14px;
+            background: #2C2C2E;
+            border: 1px dashed var(--text-sub);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            overflow: hidden;
+            transition: all 0.2s;
+            position: relative;
+            z-index: 2;
+        }
+
+        .avatar-container:hover {
+            border-color: var(--primary);
+            background: #333;
+        }
+
+        .avatar-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+
+        .avatar-placeholder {
+            color: var(--text-sub);
+            font-size: 10px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .avatar-placeholder span {
+            display: block;
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        /* 输入框样式 */
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-family: var(--font-std);
+            font-size: 14px;
+            background: #2C2C2E;
+            transition: all 0.2s;
+            color: var(--text-main);
+            -webkit-appearance: none;
+        }
+
+        input[type="number"] { font-family: var(--font-num); font-weight: 500; }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: #3A3A3C;
+            box-shadow: 0 0 0 2px rgba(255, 214, 10, 0.3);
+        }
+
+        /* 分段控制器 */
+        .tab-control {
+            background: #2C2C2E;
+            padding: 3px;
+            border-radius: 10px;
+            display: flex;
+            margin-bottom: 24px;
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 10px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-sub);
+            border-radius: 8px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: #636366;
+            color: #FFF;
+            font-weight: 600;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        /* 内容卡片 */
+        .content-area { display: none; animation: fadeIn 0.3s cubic-bezier(0.25, 1, 0.5, 1); }
+        .content-area.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        .section-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255,255,255,0.05);
+            position: relative;
+        }
+
+        .section-title {
+            font-size: 17px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--primary);
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 18px;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+
+        /* 加大的板块重置按钮 */
+        .section-reset-btn {
+            margin-left: auto;
+            background: rgba(255, 69, 58, 0.1);
+            border: 1px solid rgba(255, 69, 58, 0.4);
+            color: var(--danger);
+            font-size: 13px; /* 字体加大 */
+            padding: 6px 14px; /* 点击区域加大 */
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            font-family: var(--font-std);
+            letter-spacing: 0.5px;
+        }
+
+        .section-reset-btn:hover {
+            background: var(--danger);
+            color: white;
+            border-color: var(--danger);
+            transform: scale(1.02);
+        }
+
+        .section-reset-btn:active {
+            transform: scale(0.96);
+        }
+
+        .grid-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-item label {
+            display: block;
+            font-size: 13px;
+            color: var(--text-sub);
+            margin-bottom: 8px;
+        }
+
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 8px 4px;
+        }
+        .checkbox-grid::-webkit-scrollbar { width: 4px; }
+        .checkbox-grid::-webkit-scrollbar-thumb { background: #48484A; border-radius: 2px; }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 14px;
+            padding: 14px 16px;
+            border-radius: 12px;
+            background: #2C2C2E;
+            cursor: pointer;
+            user-select: none;
+            border: 1px solid transparent;
+            position: relative;
+            transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+            color: var(--text-sub);
+            min-height: 50px; /* 保证高度统一 */
+        }
+
+        .checkbox-item input { display: none; }
+
+        .checkbox-item:hover {
+            background: #333336;
+            transform: translateY(-2px);
+            box-shadow: 
+                0 6px 15px rgba(0, 0, 0, 0.4),
+                0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+            color: var(--text-main);
+            z-index: 10;
+        }
+
+        .checkbox-item:has(input:checked) {
+            background: rgba(255, 214, 10, 0.1);
+            border-color: var(--primary);
+            box-shadow: 
+                0 0 15px rgba(255, 214, 10, 0.15),
+                0 0 0 1px rgba(255, 214, 10, 0.1) inset;
+            color: #FFF;
+            transform: translateY(-1px);
+        }
+
+        /* 分数标签样式 - 核心修改
+           默认 opacity: 0 (隐藏)
+        */
+        .score-badge {
+            font-family: var(--font-num);
+            font-size: 12px;
+            background: var(--primary); /* 选中时才显示的背景色 */
+            padding: 3px 8px;
+            border-radius: 6px;
+            color: #000;
+            font-weight: 700;
+            
+            /* 关键动画属性 */
+            opacity: 0; 
+            transform: scale(0.8);
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); /* 弹性动效 */
+        }
+
+        /* 选中状态：显示分数 */
+        .checkbox-item:has(input:checked) .score-badge {
+            opacity: 1;
+            transform: scale(1);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        /* 悬停状态：也可以选择微微显示，或者保持隐藏直到选中 */
+        /* 这里选择：悬停时依旧隐藏，保持干净，只有点击选中才出现 */
+
+        .highlight-box {
+            background: rgba(255, 214, 10, 0.05);
+            border: 1px solid rgba(255, 214, 10, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 12px;
+        }
+        .warning-box {
+            background: rgba(255, 69, 58, 0.08);
+            border: 1px solid rgba(255, 69, 58, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 12px;
+        }
+
+        .bottom-dock {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 92%;
+            max-width: 600px;
+            background: rgba(28, 28, 30, 0.9);
+            backdrop-filter: blur(30px) saturate(180%);
+            -webkit-backdrop-filter: blur(30px) saturate(180%);
+            padding: 16px 24px;
+            border-radius: 24px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .dock-left { display: flex; flex-direction: column; }
+        .score-label { font-size: 11px; color: var(--text-sub); margin-bottom: 4px; font-weight: 600; }
+        .score-val {
+            font-family: var(--font-num);
+            font-size: 32px;
+            line-height: 1;
+            font-weight: 700;
+            color: var(--primary);
+            text-shadow: 0 0 20px rgba(255, 214, 10, 0.25);
+        }
+        .score-formula { font-family: var(--font-num); font-size: 12px; color: var(--text-sub); text-align: right; margin-bottom: 8px; }
+        
+        .btn-group { display: flex; gap: 8px; }
+        .dock-btn {
+            border: none;
+            padding: 10px 16px;
+            border-radius: 18px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .dock-btn:active { transform: scale(0.94); }
+        .copy-btn { background: var(--text-main); color: #000; }
+        .reset-btn {
+            background: rgba(255, 69, 58, 0.15);
+            color: var(--danger);
+            border: 1px solid rgba(255, 69, 58, 0.3);
+        }
+        .reset-btn:hover { background: var(--danger); color: #FFF; }
+
+        select {
+             background: #2C2C2E !important;
+             color: var(--text-main) !important;
+             border-color: var(--border) !important;
+             border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-card">
+        <div class="header-left">
+            <div class="header-title">
+                <span><b>莱茵生命</b> // 生态科终端</span>
+                <span>NO.04</span>
+            </div>
+            <div class="header-inputs">
+                <div class="input-group">
+                    <input type="text" placeholder="选手 ID">
+                </div>
+                <div class="input-group">
+                    <input type="text" placeholder="所属战队">
+                </div>
+                <div class="input-group">
+                    <input type="text" placeholder="开局分队">
+                </div>
+            </div>
+        </div>
+
+        <div class="avatar-container" onclick="triggerUpload()">
+            <img id="avatar-img" src="" alt="Avatar">
+            <div class="avatar-placeholder" id="avatar-ph">
+                <span>+</span>
+                上传头像
+            </div>
+            <input type="file" id="avatar-input" accept="image/*" onchange="handleAvatar(this)" style="display: none;">
+        </div>
+    </div>
+
+    <div class="tab-control">
+        <button class="tab-btn active" onclick="switchTab('mizuki')">水月与深蓝之树</button>
+        <button class="tab-btn" onclick="switchTab('sami')">探索者的银淞止境</button>
+        <button class="tab-btn" onclick="switchTab('sarkaz')">萨卡兹的无终奇语</button>
+        <button class="tab-btn" onclick="switchTab('sui')">岁的界园志异</button>
+    </div>
+
+    <div id="mizuki" class="content-area active">
+        <div class="section-card">
+            <div class="section-title">
+                基础数据
+                <button class="section-reset-btn" onclick="resetSection(this)">重置</button>
+            </div>
+            <div class="grid-row">
+                <div class="form-item"><label>结算分</label><input type="number" id="m-score" value="0" oninput="calc()"></div>
+                <div class="form-item"><label>藏品数</label><input type="number" id="m-items" value="0" oninput="calc()"></div>
+            </div>
+            <div class="grid-row">
+                <div class="form-item"><label>临时六星</label><input type="number" id="m-6s" value="0" oninput="calc()"></div>
+                <div class="form-item"><label>临时五星</label><input type="number" id="m-5s" value="0" oninput="calc()"></div>
+                <div class="form-item"><label>临时四星</label><input type="number" id="m-4s" value="0" oninput="calc()"></div>
+            </div>
+            <div class="highlight-box">
+                <label class="checkbox-item"><input type="checkbox" id="m-bishop" onchange="calc()"> 携带藏品「主教的研究」 <span class="score-badge">+50</span></label>
+                <div style="height:10px"></div>
+                <label class="checkbox-item"><input type="checkbox" id="m-ending" onchange="calc()"> 双结局且整局未进入奇境 <span class="score-badge">+100</span></label>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <div class="section-title">
+                关卡加分
+                <button class="section-reset-btn" onclick="resetSection(this)">重置</button>
+            </div>
+            <div class="checkbox-grid">
+                <label class="checkbox-item"><input type="checkbox" class="m-stage" value="50" onchange="calc()"> 订正 <span class="score-badge">+50</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="m-stage" value="50" onchange="calc()"> 永恒愤怒 <span class="score-badge">+50</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="m-stage" value="50" onchange="calc()"> 异体同心 <span class="score-badge">+50</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="m-stage" value="120" onchange="calc()"> 荒地群猎 <span class="score-badge">+120</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="m-stage" value="120" onchange="calc()"> 寒灾之咒 <span class="score-badge">+120</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="m-stage" value="150" onchange="calc()"> 险路勿近 <span class="score-badge">+150</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="m-stage" value="30" onchange="calc()"> 领地意识 <span class="score-badge">+30</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="m-stage" value="30" onchange="calc()"> 铳与秩序 <span class="score-badge">+30</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="m-stage" value="30" onchange="calc()"> 溟痕乐园 <span class="score-badge">+30</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="m-stage" value="50" onchange="calc()"> 机械之灾 <span class="score-badge">+50</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="m-stage" value="50" onchange="calc()"> 失控 <span class="score-badge">+50</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="m-stage" value="50" onchange="calc()"> 好梦在何方 <span class="score-badge">+50</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="m-stage" value="50" onchange="calc()"> 余烬方阵 <span class="score-badge">+50</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="m-stage" value="50" onchange="calc()"> 育生池 <span class="score-badge">+50</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="m-stage" value="70" onchange="calc()"> 水火相容 <span class="score-badge">+70</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="m-stage" value="70" onchange="calc()"> 深度认知 <span class="score-badge">+70</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="m-stage" value="100" onchange="calc()"> 认知即重担 <span class="score-badge">+100</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="m-stage" value="250" onchange="calc()"> 命运的宠儿 <span class="score-badge">+250</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="m-stage" value="400" onchange="calc()"> 大群所向 <span class="score-badge">+400</span></label>
+            </div>
+            
+            <div class="warning-box">
+                <div class="form-item"><label>特殊：人之光辉</label></div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:5px;">
+                    <label class="checkbox-item"><input type="checkbox" id="m-human" onchange="calc()"> 完成 <span class="score-badge">+300</span></label>
+                    <label class="checkbox-item"><input type="checkbox" id="m-human-p" onchange="calc()"> 无漏 <span class="score-badge">+100</span></label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="sami" class="content-area">
+        <div class="section-card">
+            <div class="section-title">
+                基础数据
+                <button class="section-reset-btn" onclick="resetSection(this)">重置</button>
+            </div>
+            <div class="grid-row">
+                <div class="form-item"><label>结算分</label><input type="number" id="sa-score" value="0" oninput="calc()"></div>
+                <div class="form-item"><label>藏品数</label><input type="number" id="sa-items" value="0" oninput="calc()"></div>
+                <div class="form-item"><label>宣言版</label><input type="number" id="sa-plates" value="0" oninput="calc()"></div>
+            </div>
+            <div class="grid-row">
+                <div class="form-item"><label>临时六星</label><input type="number" id="sa-6s" value="0" oninput="calc()"></div>
+                <div class="form-item"><label>临时五星</label><input type="number" id="sa-5s" value="0" oninput="calc()"></div>
+                <div class="form-item"><label>临时四星</label><input type="number" id="sa-4s" value="0" oninput="calc()"></div>
+            </div>
+            <div class="highlight-box">
+                <label class="checkbox-item"><input type="checkbox" id="sa-gift" onchange="calc()"> 携带藏品「无垠赠礼」 <span class="score-badge">+70</span></label>
+            </div>
+        </div>
+        
+        <div class="section-card">
+            <div class="section-title">
+                特殊判定
+                <button class="section-reset-btn" onclick="resetSection(this)">重置</button>
+            </div>
+            <div class="highlight-box">
+                <div class="form-item"><label>园丁/哨兵 无漏加分</label></div>
+                <div class="checkbox-grid">
+                    <label class="checkbox-item"><input type="checkbox" id="sa-gardener" onchange="calc()"> 园丁无漏 <span class="score-badge">+50</span></label>
+                    <label class="checkbox-item"><input type="checkbox" id="sa-sentinel" onchange="calc()"> 哨兵无漏 <span class="score-badge">+100</span></label>
+                </div>
+            </div>
+             <div class="highlight-box">
+                <div class="form-item"><label>三藏品联动</label></div>
+                <label class="checkbox-item"><input type="checkbox" id="sa-combo" onchange="calc()"> 后触发 时光 或 永恒 <span class="score-badge">+50</span></label>
+            </div>
+            <div class="warning-box">
+                <div class="form-item"><label>结局达成</label></div>
+                <div class="checkbox-grid">
+                    <label class="checkbox-item"><input type="checkbox" id="sa-end2" onchange="calc()"> 同时达成【直至冬夜】与【自深处】 <span class="score-badge">+50</span></label>
+                    <label class="checkbox-item"><input type="checkbox" id="sa-end3" onchange="calc()"> 同时三个结局 <span class="score-badge">+150</span></label>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <div class="section-title">
+                关卡列表
+                <button class="section-reset-btn" onclick="resetSection(this)">重置</button>
+            </div>
+            <div class="checkbox-grid">
+                <label class="checkbox-item"><input type="checkbox" class="sa-stage" value="50" onchange="calc()"> 呼吸 <span class="score-badge">+50</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="sa-stage" value="50" onchange="calc()"> 夺树者 <span class="score-badge">+50</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="sa-stage" value="75" onchange="calc()"> 大地醒转 <span class="score-badge">+75</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="sa-stage" value="30" onchange="calc()"> 禁区 <span class="score-badge">+30</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="sa-stage" value="30" onchange="calc()"> 坍缩体的午后 <span class="score-badge">+30</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="sa-stage" value="50" onchange="calc()"> 亡者行军 <span class="score-badge">+50</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="sa-stage" value="50" onchange="calc()"> 混乱的表象 <span class="score-badge">+50</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="sa-stage" value="50" onchange="calc()"> 何处无山海 <span class="score-badge">+50</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="sa-stage" value="50" onchange="calc()"> 本能污染 <span class="score-badge">+50</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="sa-stage" value="70" onchange="calc()"> 人造物狂欢节 <span class="score-badge">+70</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="sa-stage" value="70" onchange="calc()"> 生灵的终点 <span class="score-badge">+70</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="sa-stage" value="50" onchange="calc()"> 巍峨银凇 <span class="score-badge">+50</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="sa-stage" value="120" onchange="calc()"> 深寒造像 <span class="score-badge">+120</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="sa-stage" value="100" onchange="calc()"> 萨米之熵 <span class="score-badge">+100</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="sa-stage" value="200" onchange="calc()"> 虚无之偶 <span class="score-badge">+200</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="sa-stage" value="150" onchange="calc()"> 园丁 (基础) <span class="score-badge">+150</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="sa-stage" value="250" onchange="calc()"> 哨兵 (基础) <span class="score-badge">+250</span></label>
+            </div>
+        </div>
+    </div>
+
+    <div id="sarkaz" class="content-area">
+        <div class="section-card" style="border-left: 4px solid var(--danger);">
+            <div class="section-title">
+                关键变量
+                <button class="section-reset-btn" onclick="resetSection(this)">重置</button>
+            </div>
+            <div class="warning-box">
+                <label class="checkbox-item"><input type="checkbox" id="sk-karma" onchange="calc()"> <strong>持有「阿纳萨羯磨」</strong></label>
+            </div>
+            <div style="margin-top:15px;">
+                 <label class="checkbox-item"><input type="checkbox" id="sk-memory" onchange="calc()"> 不允许选取「无主的回忆」: 补偿 <span class="score-badge">+12.5</span></label>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <div class="section-title">
+                基础数据
+                <button class="section-reset-btn" onclick="resetSection(this)">重置</button>
+            </div>
+            <div class="grid-row">
+                <div class="form-item"><label>结算分</label><input type="number" id="sk-score" value="0" oninput="calc()"></div>
+                <div class="form-item"><label>藏品 (+5)</label><input type="number" id="sk-items" value="0" oninput="calc()"></div>
+            </div>
+             <div class="grid-row">
+                <div class="form-item"><label>临时六星</label><input type="number" id="sk-6s" value="0" oninput="calc()"></div>
+                <div class="form-item"><label>临时五星</label><input type="number" id="sk-5s" value="0" oninput="calc()"></div>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <div class="section-title">
+                特殊关卡逻辑
+                <button class="section-reset-btn" onclick="resetSection(this)">重置</button>
+            </div>
+            <div class="checkbox-grid">
+                <div class="highlight-box" style="grid-column: 1/-1;">
+                    <div style="font-weight:700; margin-bottom:5px;">思维矫正</div>
+                    <div class="checkbox-grid" style="grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));">
+                        <label class="checkbox-item"><input type="checkbox" id="sk-n1-done" onchange="calc()"> 完成</label>
+                        <label class="checkbox-item"><input type="checkbox" id="sk-n1-perf" onchange="calc()"> 无漏</label>
+                        <label class="checkbox-item"><input type="checkbox" id="sk-n1-conf" onchange="calc()"> 思绪混乱</label>
+                    </div>
+                </div>
+                <div class="highlight-box" style="grid-column: 1/-1;">
+                    <div style="font-weight:700; margin-bottom:5px;">朝谒</div>
+                    <div class="checkbox-grid" style="grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));">
+                        <label class="checkbox-item"><input type="checkbox" id="sk-n2-done" onchange="calc()"> 完成</label>
+                        <label class="checkbox-item"><input type="checkbox" id="sk-n2-perf" onchange="calc()"> 无漏</label>
+                        <label class="checkbox-item"><input type="checkbox" id="sk-n2-conf" onchange="calc()"> 思绪混乱</label>
+                    </div>
+                </div>
+                <div class="highlight-box" style="grid-column: 1/-1;">
+                    <div style="font-weight:700; margin-bottom:5px;">魂灵朝谒</div>
+                    <div class="checkbox-grid" style="grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));">
+                        <label class="checkbox-item"><input type="checkbox" id="sk-n3-done" onchange="calc()"> 完成</label>
+                        <label class="checkbox-item"><input type="checkbox" id="sk-n3-perf" onchange="calc()"> 无漏</label>
+                        <label class="checkbox-item"><input type="checkbox" id="sk-n3-conf" onchange="calc()"> 思绪混乱</label>
+                    </div>
+                </div>
+                 <div class="highlight-box" style="grid-column: 1/-1;">
+                    <div style="font-weight:700; margin-bottom:5px;">不容拒绝</div>
+                    <div class="checkbox-grid" style="grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));">
+                        <label class="checkbox-item"><input type="checkbox" id="sk-n4-done" onchange="calc()"> 完成</label>
+                        <label class="checkbox-item"><input type="checkbox" id="sk-n4-perf" onchange="calc()"> 无漏</label>
+                        <label class="checkbox-item"><input type="checkbox" id="sk-n4-conf" onchange="calc()"> 思绪混乱</label>
+                    </div>
+                </div>
+                 <div class="highlight-box" style="grid-column: 1/-1;">
+                    <div style="font-weight:700; margin-bottom:5px;">授法</div>
+                    <div class="checkbox-grid" style="grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));">
+                        <label class="checkbox-item"><input type="checkbox" id="sk-n5-done" onchange="calc()"> 完成</label>
+                        <label class="checkbox-item"><input type="checkbox" id="sk-n5-conf" onchange="calc()"> 思绪混乱</label>
+                        <label class="checkbox-item"><input type="checkbox" id="sk-boss" onchange="calc()"> 击杀奎隆 (+300)</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section-card">
+            <div class="section-title">
+                终结系藏品
+                <button class="section-reset-btn" onclick="resetSection(this)">重置</button>
+            </div>
+             <div class="checkbox-grid">
+                <label class="checkbox-item"><input type="checkbox" id="sk-bone" onchange="calc()"> 终结的骨架</label>
+                <label class="checkbox-item"><input type="checkbox" id="sk-body" onchange="calc()"> 终结的躯体</label>
+                <label class="checkbox-item"><input type="checkbox" id="sk-reality" onchange="calc()"> 终结的实相</label>
+                <label class="checkbox-item"><input type="checkbox" id="sk-roll" onchange="calc()"> 滚动先祖 (结局关 x120%)</label>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <div class="section-title">
+                普通关卡 (勾选)
+                <button class="section-reset-btn" onclick="resetSection(this)">重置</button>
+            </div>
+            <div class="checkbox-grid">
+                 <label class="checkbox-item"><input type="checkbox" class="sk-stage" value="75" onchange="calc()"> 赴敌者 <span class="score-badge">+75</span></label>
+                 <label class="checkbox-item"><input type="checkbox" class="sk-stage" value="75" onchange="calc()"> 王冠之下 <span class="score-badge">+75</span></label>
+                 <label class="checkbox-item"><input type="checkbox" class="sk-stage" value="100" onchange="calc()"> 离歌的庭院 <span class="score-badge">+100</span></label>
+                 <label class="checkbox-item"><input type="checkbox" class="sk-stage" value="30" onchange="calc()"> 混沌 <span class="score-badge">+30</span></label>
+                 <label class="checkbox-item"><input type="checkbox" class="sk-stage" value="40" onchange="calc()"> 神出鬼没 <span class="score-badge">+40</span></label>
+                 <label class="checkbox-item"><input type="checkbox" class="sk-stage" value="40" onchange="calc()"> 争议频发 <span class="score-badge">+40</span></label>
+                 <label class="checkbox-item"><input type="checkbox" class="sk-stage" value="50" onchange="calc()"> 莱茵卫士 <span class="score-badge">+50</span></label>
+                 <label class="checkbox-item"><input type="checkbox" class="sk-stage" value="50" onchange="calc()"> 建制 <span class="score-badge">+50</span></label>
+                 <label class="checkbox-item"><input type="checkbox" class="sk-stage" value="40" onchange="calc()"> 神圣的渴求 <span class="score-badge">+40</span></label>
+                 <label class="checkbox-item"><input type="checkbox" class="sk-stage" value="50" onchange="calc()"> 谋求共识 <span class="score-badge">+50</span></label>
+                 <label class="checkbox-item"><input type="checkbox" class="sk-stage" value="70" onchange="calc()"> 外道 <span class="score-badge">+70</span></label>
+                 <label class="checkbox-item"><input type="checkbox" class="sk-stage" value="90" onchange="calc()"> 洞天福地 <span class="score-badge">+90</span></label>
+            </div>
+        </div>
+    </div>
+
+    <div id="sui" class="content-area">
+        <div class="section-card">
+            <div class="section-title">
+                基础数据
+                <button class="section-reset-btn" onclick="resetSection(this)">重置</button>
+            </div>
+            <div class="grid-row">
+                <div class="form-item"><label>结算分</label><input type="number" id="sui-score" value="0" oninput="calc()"></div>
+                <div class="form-item"><label>藏品 (+5)</label><input type="number" id="sui-items" value="0" oninput="calc()"></div>
+            </div>
+            <div class="grid-row">
+                <div class="form-item"><label>临时六星</label><input type="number" id="sui-6s" value="0" oninput="calc()"></div>
+                <div class="form-item"><label>临时五星</label><input type="number" id="sui-5s" value="0" oninput="calc()"></div>
+            </div>
+        </div>
+
+        <div class="section-card" style="border-left:4px solid var(--danger)">
+            <div class="section-title">
+                整局倍率/惩罚
+                <button class="section-reset-btn" onclick="resetSection(this)">重置</button>
+            </div>
+            <div class="checkbox-grid">
+                <label class="checkbox-item"><input type="checkbox" id="sui-item-a" onchange="calc()"> 持有「不息」 (+20%)</label>
+                <label class="checkbox-item"><input type="checkbox" id="sui-item-b" onchange="calc()"> 持有「不赦」 (+20%)</label>
+                <label class="checkbox-item" style="color:var(--danger);"><input type="checkbox" id="sui-pen-1" onchange="calc()"> 未获得「追忆仪」 (-50%)</label>
+                <label class="checkbox-item" style="color:var(--danger);"><input type="checkbox" id="sui-pen-2" onchange="calc()"> 未获得「云与漆」或「无墨长卷」 (-50%)</label>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <div class="section-title">
+                五结局加分
+                <button class="section-reset-btn" onclick="resetSection(this)">重置</button>
+            </div>
+            <div class="form-item">
+                <select id="sui-ending-sel" onchange="calc()" style="width:100%; padding:14px; border-radius:12px; border:1px solid var(--border);">
+                    <option value="0">无 / 未达成</option>
+                    <option value="400">定乾坤 (400)</option>
+                    <option value="600">定乾坤·定本源 (600)</option>
+                    <option value="800">止变·化镇抚 (800)</option>
+                    <option value="900">止变·溯承形 (900)</option>
+                    <option value="700">止变·塑旧历 (700)</option>
+                    <option value="1200">止变·役群兽 (1200)</option>
+                </select>
+            </div>
+            <div class="highlight-box" style="margin-top:10px;">
+                <label class="checkbox-item"><input type="checkbox" id="sui-end-perf" onchange="calc()"> 无漏 (根据结局类型加分)</label>
+                <div style="margin:10px 0; border-top:1px dashed #555;"></div>
+                <div class="form-item"><label>持有物品加分:</label></div>
+                <div class="checkbox-grid">
+                    <label class="checkbox-item"><input type="checkbox" id="sui-end-i1" onchange="calc()"> 忘生珍珑 <span class="score-badge">+100</span></label>
+                    <label class="checkbox-item"><input type="checkbox" id="sui-end-i2" onchange="calc()"> 云与漆 <span class="score-badge">+100</span></label>
+                    <label class="checkbox-item"><input type="checkbox" id="sui-end-i3" onchange="calc()"> 无封长盒 <span class="score-badge">+50</span></label>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <div class="section-title">
+                关卡加分
+                <button class="section-reset-btn" onclick="resetSection(this)">重置</button>
+            </div>
+            <div class="checkbox-grid" style="max-height: 400px;">
+                <label class="checkbox-item"><input type="checkbox" class="sui-stage" value="30" onchange="calc()"> 夕娥忆 <span class="score-badge">+30</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="sui-stage" value="70" onchange="calc()"> 求道 <span class="score-badge">+70</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="sui-stage" value="50" onchange="calc()"> 仁·义·武 <span class="score-badge">+50</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="sui-stage" value="0" onchange="calc()"> 破岁阵祀 <span class="score-badge">+0</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="sui-stage" value="150" onchange="calc()"> 昔字如烟 <span class="score-badge">+150</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="sui-stage" value="50" onchange="calc()"> 天数将易 <span class="score-badge">+50</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="sui-stage" value="200" onchange="calc()"> 往昔难忆 <span class="score-badge">+200</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="sui-stage" value="200" onchange="calc()"> 谋岁者 <span class="score-badge">+200</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="sui-stage" value="200" onchange="calc()"> 末狩 <span class="score-badge">+200</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="sui-stage" value="30" onchange="calc()"> 赶场戏班 <span class="score-badge">+30</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="sui-stage" value="40" onchange="calc()"> 峥嵘战功 <span class="score-badge">+40</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="sui-stage" value="50" onchange="calc()"> 忍气不吞声 <span class="score-badge">+50</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="sui-stage" value="40" onchange="calc()"> 离域检查 <span class="score-badge">+40</span></label>
+                <label class="checkbox-item" style="margin-left:20px;"><input type="checkbox" class="sui-stage" value="30" onchange="calc()"> ↳ 通宝「岁醒」被投出 <span class="score-badge">+30</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="sui-stage" value="50" onchange="calc()"> 往事喑哑 <span class="score-badge">+50</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="sui-stage" value="60" onchange="calc()"> 邙山镇地方志 <span class="score-badge">+60</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="sui-stage" value="50" onchange="calc()"> 砺锋 <span class="score-badge">+50</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="sui-stage" value="70" onchange="calc()"> 不成烟火 <span class="score-badge">+70</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="sui-stage" value="150" onchange="calc()"> 越山海 <span class="score-badge">+150</span></label>
+                <label class="checkbox-item"><input type="checkbox" class="sui-stage" value="70" onchange="calc()"> 炎灼 <span class="score-badge">+70</span></label>
+            </div>
+            
+            <div class="warning-box">
+                <div class="form-item"><label>下方物品勾选</label></div>
+                <div class="checkbox-grid">
+                    <label class="checkbox-item"><input type="checkbox" id="sui-extra-1" onchange="calc()"> 小磨叽</label>
+                    <label class="checkbox-item"><input type="checkbox" id="sui-extra-2" onchange="calc()"> 忘生珍珑</label>
+                    <label class="checkbox-item"><input type="checkbox" id="sui-extra-3" onchange="calc()"> 云与漆</label>
+                    <label class="checkbox-item"><input type="checkbox" id="sui-extra-4" onchange="calc()"> 无封长盒</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-dock">
+        <div class="dock-left">
+            <div class="score-label">总分</div>
+            <div class="score-val" id="total-score">0.00</div>
+        </div>
+        <div>
+            <div class="score-formula" id="formula-text">x 1.0</div>
+            <div class="btn-group">
+                <button class="dock-btn copy-btn" onclick="copyScore()">复制</button>
+                <button class="dock-btn reset-btn" onclick="resetForm()">重置全部</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentTab = 'mizuki';
+
+        function switchTab(id) {
+            currentTab = id;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.content-area').forEach(c => c.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(id).classList.add('active');
+            calc();
+        }
+
+        function getVal(id) {
+            const el = document.getElementById(id);
+            return parseFloat(el.value) || 0;
+        }
+
+        function getCheck(id) {
+            const el = document.getElementById(id);
+            return el && el.checked ? 1 : 0;
+        }
+
+        function triggerUpload() {
+            document.getElementById('avatar-input').click();
+        }
+
+        function handleAvatar(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.getElementById('avatar-img');
+                    const ph = document.getElementById('avatar-ph');
+                    img.src = e.target.result;
+                    img.style.display = 'block';
+                    ph.style.display = 'none';
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function resetSection(btn) {
+            const card = btn.closest('.section-card');
+            if(!card) return;
+
+            const inputs = card.querySelectorAll('input, select');
+            
+            inputs.forEach(input => {
+                if(input.type === 'checkbox') {
+                    input.checked = false;
+                } else if(input.type === 'number') {
+                    input.value = 0;
+                } else if(input.tagName === 'SELECT') {
+                    input.selectedIndex = 0;
+                } else {
+                    input.value = '';
+                }
+            });
+
+            calc();
+        }
+
+        function calc() {
+            let total = 0;
+            let formula = "";
+
+            if (currentTab === 'mizuki') {
+                let raw = getVal('m-score') + (getVal('m-items') * 10);
+                raw += (getVal('m-6s') * 50) + (getVal('m-5s') * 20) + (getVal('m-4s') * 10);
+                if (getCheck('m-bishop')) raw += 50;
+                if (getCheck('m-ending')) raw += 100;
+                
+                document.querySelectorAll('.m-stage:checked').forEach(el => raw += parseFloat(el.value));
+                if (getCheck('m-human')) raw += 300;
+                if (getCheck('m-human-p')) raw += 100;
+
+                total = raw * 1.2;
+                formula = `(${raw} x 1.2)`;
+            } 
+            else if (currentTab === 'sami') {
+                let raw = getVal('sa-score') + (getVal('sa-items') * 10) + (getVal('sa-plates') * 5);
+                raw += (getVal('sa-6s') * 50) + (getVal('sa-5s') * 20); 
+                
+                if (getCheck('sa-gift')) raw += 70;
+                if (getCheck('sa-gardener')) raw += 50;
+                if (getCheck('sa-sentinel')) raw += 100;
+                if (getCheck('sa-combo')) raw += 50;
+                if (getCheck('sa-end2')) raw += 50;
+                if (getCheck('sa-end3')) raw += 150;
+
+                document.querySelectorAll('.sa-stage:checked').forEach(el => raw += parseFloat(el.value));
+
+                total = raw * 1.0;
+                formula = `(${raw} x 1.0)`;
+            }
+            else if (currentTab === 'sarkaz') {
+                let raw = getVal('sk-score') + (getVal('sk-items') * 5);
+                raw += (getVal('sk-6s') * 50) + (getVal('sk-5s') * 20);
+                if (getCheck('sk-memory')) raw += 12.5;
+
+                const hasKarma = getCheck('sk-karma');
+                
+                if(getCheck('sk-n1-done')) {
+                    let v = hasKarma ? 120 : 50;
+                    if(getCheck('sk-n1-conf')) v += hasKarma ? 50 : 20;
+                    raw += v;
+                }
+                if(hasKarma && getCheck('sk-n1-perf')) raw += 80;
+
+                if(getCheck('sk-n2-done')) {
+                    let v = hasKarma ? 200 : 50;
+                    if(getCheck('sk-n2-conf')) v += hasKarma ? 50 : 20;
+                    raw += v;
+                }
+                if(getCheck('sk-n3-done')) {
+                    let v = hasKarma ? 300 : 100;
+                    if(getCheck('sk-n3-conf')) v += hasKarma ? 50 : 20;
+                    raw += v;
+                }
+                if(getCheck('sk-n4-done')) {
+                    let v = 400; 
+                    if(getCheck('sk-n4-conf')) v += 200;
+                    raw += v;
+                }
+
+                if(getCheck('sk-n5-done')) {
+                    let v = 500;
+                    if(getCheck('sk-n5-conf')) v += 100;
+                    raw += v;
+                }
+                if(getCheck('sk-boss')) raw += 300;
+
+                document.querySelectorAll('.sk-stage:checked').forEach(el => raw += parseFloat(el.value));
+
+                total = raw * 0.6;
+                formula = `(${raw} x 0.6)`;
+            }
+            else if (currentTab === 'sui') {
+                let raw = getVal('sui-score') + (getVal('sui-items') * 5);
+                raw += (getVal('sui-6s') * 50) + (getVal('sui-5s') * 20);
+                
+                let endVal = parseFloat(document.getElementById('sui-ending-sel').value);
+                if(endVal > 0) {
+                    raw += endVal;
+                    if(getCheck('sui-end-i1')) raw += 100;
+                    if(getCheck('sui-end-i2')) raw += 100;
+                    if(getCheck('sui-end-i3')) raw += 50;
+                    
+                    if(getCheck('sui-end-perf')) {
+                        if(endVal == 400 || endVal == 600 || endVal == 700) raw += 200;
+                        if(endVal == 800) raw += 250;
+                        if(endVal == 900) raw += 300;
+                        if(endVal == 1200) raw += 500;
+                    }
+                }
+
+                document.querySelectorAll('.sui-stage:checked').forEach(el => raw += parseFloat(el.value));
+
+                if(getCheck('sui-extra-1')) raw += 50; 
+                if(getCheck('sui-extra-2')) raw += 50;
+                if(getCheck('sui-extra-3')) raw += 50;
+                if(getCheck('sui-extra-4')) raw += 50;
+
+                let mult = 0.5;
+                if(getCheck('sui-item-a')) raw = raw * 1.2;
+                if(getCheck('sui-item-b')) raw = raw * 1.2;
+                
+                if(getCheck('sui-pen-1')) mult *= 0.5;
+                if(getCheck('sui-pen-2')) mult *= 0.5;
+
+                total = raw * mult;
+                formula = `(${raw.toFixed(1)} x ${mult})`;
+            }
+
+            document.getElementById('total-score').innerText = total.toFixed(2);
+            document.getElementById('formula-text').innerText = formula;
+        }
+
+        function copyScore() {
+            const score = document.getElementById('total-score').innerText;
+            navigator.clipboard.writeText(score).then(() => {
+                alert("分数已复制: " + score);
+            });
+        }
+
+        function resetForm() {
+            if(!confirm("确定要重置所有数据吗？")) return;
+            
+            const inputs = document.querySelectorAll('input');
+            inputs.forEach(input => {
+                if(input.type === 'checkbox') {
+                    input.checked = false;
+                } else if(input.type === 'number') {
+                    input.value = 0;
+                } else if(input.type === 'file') {
+                    input.value = '';
+                } else {
+                    input.value = '';
+                }
+            });
+
+            document.getElementById('avatar-img').src = '';
+            document.getElementById('avatar-img').style.display = 'none';
+            document.getElementById('avatar-ph').style.display = 'block';
+
+            const selects = document.querySelectorAll('select');
+            selects.forEach(select => {
+                select.selectedIndex = 0;
+            });
+
+            calc();
+        }
+    </script>
+</body>
+</html>
