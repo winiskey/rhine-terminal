@@ -981,6 +981,19 @@
 
             document.getElementById('total-score').innerText = total.toFixed(2);
             document.getElementById('formula-text').innerText = formula;
+
+            // ===========================================
+            // 星球杯自动同步逻辑 (新增)
+            // ===========================================
+            if (window.parent !== window) {
+                window.parent.postMessage({
+                    type: 'PLANET_CUP_UPDATE_SCORE',
+                    payload: {
+                        score: parseFloat(total.toFixed(2)),
+                        theme: currentTab
+                    }
+                }, '*');
+            }
         }
 
         function copyScore() {
